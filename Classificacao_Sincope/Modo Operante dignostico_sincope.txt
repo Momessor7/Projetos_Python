@@ -1,0 +1,27 @@
+Modo Operante: Sistema de Apoio à Classificação de Síncope
+1. Objetivo do Sistema
+O sistema foi projetado para atuar como uma ferramenta de apoio educacional e de triagem inicial. Seu objetivo principal é coletar sintomas relatados sobre um episódio de síncope e, com base em um conjunto de regras predefinidas, sugerir a classificação mais provável (Vasovagal, Ortostática ou Cardíaca). Adicionalmente, o sistema armazena um registro de cada caso analisado para futuras consultas.
+
+2. Arquitetura do Sistema
+O sistema é composto por dois componentes principais que trabalham em conjunto:
+Script Python (seu_codigo.py): É o coração do sistema, a camada de aplicação. Ele contém toda a lógica de negócio, a interação com o usuário e as regras de decisão. É responsável por processar as informações.
+Banco de Dados SQLite (pacientes_sincope.db): É a camada de persistência de dados. Funciona como a "memória" de longo prazo do sistema, armazenando os dados de cada paciente e diagnóstico em um arquivo único e estruturado.
+A interação é unidirecional: o Script Python lê e escreve no Banco de Dados. O Banco de Dados nunca inicia uma ação, ele apenas armazena e serve os dados quando solicitado.
+
+3. Organização e Estrutura do Código
+O código Python foi modularizado em blocos funcionais para garantir organização, legibilidade e facilidade de manutenção. Cada bloco tem uma responsabilidade única.
+Módulo de Banco de Dados (start_database, save_patients): Responsabilidade - Gerenciar toda e qualquer interação com o banco de dados pacientes_sincope.db. Funcionamento - A função start_database garante que a estrutura (tabela pacientes) esteja pronta para receber dados. A função save_patients recebe as informações do paciente e do diagnóstico, formata-as corretamente (transformando a lista de sintomas em texto, por exemplo) e as insere no banco de dados de forma segura, usando parâmetros para evitar erros e ataques. Este módulo isola o resto do programa dos detalhes da linguagem SQL.
+Módulo de Lógica de Decisão (O "Cérebro" - DIAGNOSTIC_RULES, diagnosis_syncope): Responsabilidade - Implementar a inteligência do sistema para classificar a síncope. Funcionamento - As regras são armazenadas em uma estrutura de dados de fácil leitura (DIAGNOSTIC_RULES), que funciona como uma base de conhecimento. A função diagnosis_syncope implementa um algoritmo de pontuação: ela recebe os sintomas do paciente, compara-os com a base de conhecimento e atribui pontos a cada possível diagnóstico. Ao final, ela identifica e retorna o diagnóstico com a maior pontuação acumulada.
+Módulo de Interface e Controle (main): Responsabilidade - Gerenciar todo o fluxo de execução e a interação com o usuário final. Funcionamento - Atua como o "maestro" do programa. Ele é executado em um loop contínuo, orquestrando a seguinte sequência para cada paciente: Chama as funções de interface para exibir mensagens e coletar dados (nome, idade, sintomas). Valida as entradas do usuário (como garantir que a idade seja um número). Chama o Módulo de Lógica de Decisão, enviando os sintomas coletados e recebendo o diagnóstico. Formata e exibe os resultados de forma clara para o usuário. Chama o Módulo de Banco de Dados para persistir o registro completo do caso. Controla o fluxo de repetição, perguntando ao usuário se deseja registrar um novo caso.
+
+4. Fluxo de Execução (Passo a Passo)
+Quando um usuário executa o script, a seguinte sequência de eventos ocorre:
+Iniciação: O programa é iniciado. A função main chama start_database(), que verifica a integridade do banco de dados, criando-o se necessário.
+Boas-Vindas: Uma mensagem de boas-vindas e um aviso legal importante são exibidos no terminal.
+Coleta de Dados do Paciente: O sistema solicita interativamente ao usuário o nome, idade e profissão do paciente. A entrada da idade é validada para garantir que seja um valor numérico.
+Apresentação e Seleção dos Sintomas: O sistema exibe uma lista numerada de todos os sintomas possíveis e pede ao usuário que insira os números correspondentes aos sintomas relatados, separados por vírgula.
+Processamento da Entrada: A entrada do usuário (uma string como "1, 5, 8") é processada, validada e convertida em uma lista de chaves de sintomas que o programa pode entender (ex: ['gatilho_emocional', 'dor_no_peito_associada']).
+Análise e Diagnóstico: A lista de chaves de sintomas é enviada para a função diagnosis_syncope. A função executa seu algoritmo de pontuação e retorna o diagnóstico mais provável e sua pontuação.
+Apresentação do Resultado: O sistema exibe um resumo do caso, incluindo os dados do paciente, os sintomas relatados e a sugestão de classificação da síncope. Um alerta especial é exibido se houver suspeita de síncope cardíaca.
+Persistência de Dados: Após a exibição, os dados completos da sessão (nome, idade, diagnóstico, sintomas e data/hora do registro) são enviados para a função save_patients e gravados de forma permanente no arquivo pacientes_sincope.db.
+Ciclo de Repetição: O sistema pergunta ao usuário se deseja registrar um novo paciente. Se a resposta for "s", o fluxo retorna ao Passo 3. Caso contrário, o loop é encerrado e o programa termina.
