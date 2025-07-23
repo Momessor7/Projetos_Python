@@ -1,0 +1,7 @@
+faster-whisper
+moviepy
+ffmpeg-python
+pip install -r requirements.txt
+
+Pegue um video aleatório, eu utilizei o Pexels e quanto ao áudio, pegar do yt msm, o link(obs: tentei a primeira vez sem as aspas no link e nao deu certo).
+Utilizei também o ambiente virtual(venv) para fazer download do que era preciso para poder continuar o programa.
